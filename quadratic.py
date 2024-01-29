@@ -88,26 +88,36 @@ def plot_cost(y_cost: list):
     Plot convergence for the cost function over the number of cycles
     y_cost: list with all the calculated cost values 
     '''
-    plt.figure() 
     x_cost = range(len(y_cost))
+    y_cost = list(map(math.log, y_cost))
     plt.scatter(x_cost, y_cost, color='red')
     plt.title('Cost function convergence')
     plt.xlabel('Iterations', size=12)
     plt.ylabel('Cost function', size=12)
     plt.savefig('cost.png', dpi=300, bbox_inches='tight')
     plt.show()
-    plt.figure().clear()
+
+
+
 
 if __name__ == '__main__':
-    x_train = np.array([[0.0], [0.5], [1.0]])
-    y_train = np.array([2.0, 2.5, 3.0])
-    params = np.array([0.0, 0.0])
+    # y = wx + b
+    # y = wx2 + ax + b
+    # y = wz + ax +b --> z =x2
 
-    before_train = np.dot(params[1:], [2.0]) + params[0]
+    x_train = np.array([[0.0], [0.5], [1.0], [0.7], [0.9], [1.5]])
+    y_train = np.array([1.0, 4.0, 9.0, 2.0, 3.0, 10.2])
+    params = np.array([0.0, 0.0, 0.0])
+
+    n, m = x_train.shape
+
+    # create extra feaures to transform linear in quadratic
+    x_train = np.array([[x_train[i][0], x_train[i][0]**2] for i in range(n)])
+
+    before_train = np.dot(params[1:], [2.0, 4.0]) + params[0]
     print(str(before_train))
 
     n, m = x_train.shape
-    print(x_train.shape)
     x_train_max = [0.0] * m
     for j in range(m):
         x_train_j = [x_train[i][j] for i in range(n)]
@@ -116,7 +126,7 @@ if __name__ == '__main__':
             x_train[i][j] /= x_train_max[j]
     
     y_cost = []
-    for i in range(4000):
+    for i in range(40000):
         params = train(x_train, y_train, params, 0.01, linear_regression_gradient)
         y_cost.append(cost_linear(x_train, y_train, params))
 
@@ -125,13 +135,13 @@ if __name__ == '__main__':
     for i in range(m):
         params[i+1] /= x_train_max[i]
 
-    after_train = np.dot(params[1:], [2.0]) + params[0]
+    after_train = np.dot(params[1:], [2.0, 4.0]) + params[0]
 
-    if m == 1:
+    if m == 2:
         plt.figure()
         x = np.linspace(0, x_train_max, 100)
-        y = params[1] * x + params[0]
-        plt.scatter(x_train, y_train, c='green')
+        y = params[2] * x**2 + params[1]*x + params[0]
+        plt.scatter([x_train[i][0] for i in range(n)], y_train, c='green')
         plt.plot(x,y)
         plt.savefig('model.png', dpi=300, bbox_inches='tight')
         plt.figure().clear()
